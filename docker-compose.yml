@@ -1,0 +1,38 @@
+version: "3.9"
+
+services:
+  mysql:
+    container_name: "skeleton-mysql"
+    image: mysql
+    ports:
+      - 3308:3306
+    volumes:
+      - mysql_volume:/var/lib/mysql
+    command: --default-authentication-plugin=mysql_native_password
+    environment:
+      MYSQL_ROOT_USER: ${MYSQL_ROOT_USER:-false}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-false}
+      MYSQL_USER: ${MYSQL_USER:-false}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-false}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-false}
+      MYSQL_HOST: ${MYSQL_HOST:-false}
+  php:
+    container_name: "skeleton-php"
+    image: itlab77/php:8.1.0
+    working_dir: /var/www
+    volumes:
+      - .:/var/www
+    command: php -S 0.0.0.0:80 -t ./public
+    ports:
+      - 8888:80
+    environment:
+      MYSQL_USER: ${MYSQL_USER:-false}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-false}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-false}
+      MYSQL_HOST: ${MYSQL_HOST:-false}
+      MYSQL_PORT: ${MYSQL_PORT:-false}
+    depends_on:
+      - mysql
+volumes:
+  mysql_volume:
+    driver: local

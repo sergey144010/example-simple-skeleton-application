@@ -1,0 +1,45 @@
+#!/usr/bin/env bash
+
+if [ $# -gt 0 ]; then
+    if [ "$1" == "check" ]; then
+        shift 1
+        php ./vendor/bin/phpcbf
+        php ./vendor/bin/phpcs -p
+        php ./vendor/bin/phpstan analyse
+        php ./vendor/bin/phpunit
+    elif [ "$1" == "start" ]; then
+        shift 1
+        docker-compose up -d --remove-orphans
+    elif [ "$1" == "stop" ]; then
+        shift 1
+        docker-compose stop
+    elif [ "$1" == "phinx" ]; then
+        shift 1
+        php ./vendor/bin/phinx "$@"
+    elif [ "$1" == "create-migration" ]; then
+        shift 1
+        php ./vendor/bin/phinx create -c ./config/phinx.php "$@"
+    elif [ "$1" == "migrate-dev" ]; then
+        shift 1
+        env $(cat .env | grep -v "#" | xargs) php ./vendor/bin/phinx migrate -c ./config/phinx.php -e development "$@"
+    elif [ "$1" == "migrate-dry" ]; then
+        shift 1
+        php ./vendor/bin/phinx migrate -c ./config/phinx.php --dry-run "$@"
+    elif [ "$1" == "phpunit" ]; then
+        shift 1
+        docker-compose exec php php ./vendor/bin/phpunit "$@"
+    elif [ "$1" == "phpcs" ]; then
+        shift 1
+        docker-compose exec php php ./vendor/bin/phpcs -p
+    elif [ "$1" == "phpcbf" ]; then
+        shift 1
+        docker-compose exec php php ./vendor/bin/phpcbf
+    elif [ "$1" == "phpstan" ]; then
+        shift 1
+        docker-compose exec php php ./vendor/bin/phpstan analyse
+    else
+        echo "./develop: Unknown command '$@'"
+    fi
+else
+    echo "./develop: You must specify some command"
+fi
